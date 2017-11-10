@@ -48,8 +48,8 @@ void forward(uint8_t speed)
   digitalWrite(RIGHT_MOTOR_IN1, HIGH);
   digitalWrite(RIGHT_MOTOR_IN2, LOW);
 
-  digitalWrite(LEFT_MOTOR_PWM, speed); 
-  digitalWrite(RIGHT_MOTOR_PWM, speed);
+  analogWrite(LEFT_MOTOR_PWM, speed); 
+  analogWrite(RIGHT_MOTOR_PWM, speed);
 }
 
 void reverse(uint8_t speed)
@@ -59,8 +59,8 @@ void reverse(uint8_t speed)
   digitalWrite(RIGHT_MOTOR_IN1, LOW);
   digitalWrite(RIGHT_MOTOR_IN2, HIGH);
 
-  digitalWrite(LEFT_MOTOR_PWM, leftSpeed(speed)); 
-  digitalWrite(RIGHT_MOTOR_PWM, rightSpeed(speed));
+  analogWrite(LEFT_MOTOR_PWM, leftSpeed(speed)); 
+  analogWrite(RIGHT_MOTOR_PWM, rightSpeed(speed));
 }
 
 void left(uint8_t speed)
@@ -81,16 +81,16 @@ void right(uint8_t speed)
   digitalWrite(RIGHT_MOTOR_IN1, LOW);
   digitalWrite(RIGHT_MOTOR_IN2, HIGH);
 
-  digitalWrite(LEFT_MOTOR_PWM, leftSpeed(speed));
-  digitalWrite(RIGHT_MOTOR_PWM, rightSpeed(speed));
+  analogWrite(LEFT_MOTOR_PWM, leftSpeed(speed));
+  analogWrite(RIGHT_MOTOR_PWM, rightSpeed(speed));
 }
 
 void stop()
 {
   digitalWrite(LEFT_MOTOR_IN1, LOW);
   digitalWrite(LEFT_MOTOR_IN2, LOW);
-  digitalWrite(LEFT_MOTOR_PWM, 0);
-  digitalWrite(RIGHT_MOTOR_PWM, 0);
+  analogWrite(LEFT_MOTOR_PWM, 0);
+  analogWrite(RIGHT_MOTOR_PWM, 0);
   digitalWrite(RIGHT_MOTOR_IN1, LOW);
   digitalWrite(RIGHT_MOTOR_IN2, LOW);
 }
