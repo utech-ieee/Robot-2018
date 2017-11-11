@@ -12,6 +12,8 @@ const uint8_t RIGHT_MOTOR_IN2 = 5;
 Encoder leftEncoder(18, 19);
 Encoder rightEncoder(20, 21);
 
+int gLSpeed = 0;
+int gRSpeed = 0;
 long leftEncoderPosition;
 long rightEncoderPosition;
 
@@ -37,8 +39,16 @@ void loop()
   Serial.print("  Right Motor: ");
   Serial.print(rightEncoderPosition);
   Serial.println();
+
+  Serial.print("Left Speed: ");
+  Serial.print(gLSpeed);
+  Serial.print("  Right Speed: ");
+  Serial.print(gRSpeed);
+  Serial.println();
+
+  
   delay(1000);
-  forward(70);
+  forward(255);
 }
 
 void forward(uint8_t speed)
@@ -48,8 +58,8 @@ void forward(uint8_t speed)
   digitalWrite(RIGHT_MOTOR_IN1, HIGH);
   digitalWrite(RIGHT_MOTOR_IN2, LOW);
 
-  analogWrite(LEFT_MOTOR_PWM, speed); 
-  analogWrite(RIGHT_MOTOR_PWM, speed);
+  analogWrite(LEFT_MOTOR_PWM, gLSpeed = leftSpeed(speed)); 
+  analogWrite(RIGHT_MOTOR_PWM, gRSpeed = rightSpeed(speed));
 }
 
 void reverse(uint8_t speed)
@@ -89,8 +99,8 @@ void stop()
 {
   digitalWrite(LEFT_MOTOR_IN1, LOW);
   digitalWrite(LEFT_MOTOR_IN2, LOW);
-  analogWrite(LEFT_MOTOR_PWM, 0);
-  analogWrite(RIGHT_MOTOR_PWM, 0);
+  digitalWrite(LEFT_MOTOR_PWM, 0);
+  digitalWrite(RIGHT_MOTOR_PWM, 0);
   digitalWrite(RIGHT_MOTOR_IN1, LOW);
   digitalWrite(RIGHT_MOTOR_IN2, LOW);
 }
@@ -99,16 +109,16 @@ void stop()
 uint8_t leftSpeed(uint8_t speed)
 {
   if (abs(leftEncoderPosition) > abs(rightEncoderPosition))
-    return (leftEncoderPosition * speed / rightEncoderPosition);
-    //(return speed - 50);
+//    return (leftEncoderPosition * speed / rightEncoderPosition);
+    return (speed - 50);
   return speed;
 }
 
 uint8_t rightSpeed(uint8_t speed)
 {
   if (abs(rightEncoderPosition) > abs(leftEncoderPosition))
-    return (rightEncoderPosition * speed / leftEncoderPosition);
-    //return (speed - 50);
+//    return (rightEncoderPosition * speed / leftEncoderPosition);
+    return (speed - 50);
   return speed;
 }
 
