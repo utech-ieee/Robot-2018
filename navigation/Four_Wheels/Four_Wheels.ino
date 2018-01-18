@@ -17,31 +17,26 @@ void loop()
 {
   while (Serial.available()) 
   {
-    value = Serial.read();
-    switch(value)
+    value = Serial.readString();
+    if(value == "Move forward")
     {
-      case '0':
-        forward(170);
-        break;
-
-      case '1':
-        reverse(170);
-        break;
-
-      case '2':
-        left(170);
-        break;
-
-       case '3':
-        right(170);
-        break;
-
-       case '4':
-        stop();
-        break;
-      
-      default:
-        break;
+      forward(170);
+    }
+    else if (value == "Move Back")
+    {
+      reverse(170);
+    }
+    else if (value == "Move Left")
+    {
+      left(170);
+    }
+    else if (value == "Move Right")
+    {
+      right(170);
+    }
+    else if(value == "Stop")
+    {
+      stop();
     }
   }
 }
