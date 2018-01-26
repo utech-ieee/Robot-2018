@@ -1,110 +1,92 @@
 #include <Stepper.h>
 
 const int stepsPerRevolution = 200;
+int numOfSteps;
+String direction;
 String value;
+
 Stepper leftWheel(stepsPerRevolution, 8, 9, 10, 11);
 Stepper rightWheel(stepsPerRevolution, 4, 5, 6, 7);
-
 
 void setup() 
 {
   Serial.begin(9600);
+  setStepperSpeed(170);
 }
 
 void loop()
 {
  while (Serial.available()) 
  {
-   value = Serial.readString();
-   if(value == "Move Forward")
+   split(Serial.readString());
+   if(direction == "Move Forward")
    {
-     forward(170);
+     forward(numOfSteps);
    }
-   else if (value == "Move Back")
+   else if (direction == "Move Back")
    {
-     reverse(170);
+     reverse(numOfSteps);
    }
-   else if (value == "Move Left")
+   else if (direction == "Move Left")
    {
-     left(170);
+     left(numOfSteps);
    }
-   else if (value == "Move Right")
+   else if (direction == "Move Right")
    {
-     right(170);
+     right(numOfSteps);
    }
-   else if(value == "Stop")
+   else if(direction == "Stop")
    {
      stop();
    }
  }
 }
 
-void forward(uint8_t speed)
+void forward(int steps)
 {
-  setStepperSpeed(speed);
-  for (int i = 0; i < stepsPerRevolution; ++i)
+  for (int i = 0; i < steps; ++i)
   {
-    if (isDirectionChanged("Move Forward"))
-    {
-      break;
-    }
     leftWheel.step(1);
     rightWheel.step(-1);
   }
-  Serial.println("Direction: Forward");
+//  Serial.println("Direction: Forward");
 }
 
-void reverse(uint8_t speed)
+void reverse(int steps)
 {
-  setStepperSpeed(speed);
-  for (int i = 0; i < stepsPerRevolution; ++i)
+  for (int i = 0; i < steps; ++i)
   {
-    if (isDirectionChanged("Move Back"))
-    {
-      break;
-    }
     leftWheel.step(-1);
     rightWheel.step(-1);
   }
-  Serial.println("Direction: Reverse");
+//  Serial.println("Direction: Reverse");
 }
 
-void left(uint8_t speed)
+void left(int steps)
 {
-  setStepperSpeed(speed);
-  for (int i = 0; i < stepsPerRevolution; ++i)
+  for (int i = 0; i < steps; ++i)
   {
-    if (isDirectionChanged("Move Left"))
-    {
-      break;
-    }
     leftWheel.step(-1);
     rightWheel.step(1);
   }
-  Serial.println("Direction: Left");
+//  Serial.println("Direction: Left");
 }
 
-void right(uint8_t speed)
+void right(int steps)
 {
-  setStepperSpeed(speed);
-  for (int i = 0; i < stepsPerRevolution; ++i)
+  for (int i = 0; i < steps; ++i)
   {
-    if (isDirectionChanged("Move Right"))
-    {
-      break;
-    }
     leftWheel.step(-1);
     rightWheel.step(1);
   }
-  Serial.println("Direction: Right");
+//  Serial.println("Direction: Right");
 }
 
 void stop()
 {
-  setStepperSpeed(0);
   leftWheel.step(0);
   rightWheel.step(0);
-  Serial.println("Direction: Stop");
+//  Serial.println("Direction: Stop");
 }
 
 void setStepperSpeed(uint8_t speed)
@@ -113,38 +95,16 @@ void setStepperSpeed(uint8_t speed)
   rightWheel.setSpeed(speed);
 }
 
-bool isDirectionChanged(String currentDirection)
+void split(String string)
 {
-  if (Serial.available()) 
+  for (int i = 0; i < string.length(); i++) 
   {
-    value = Serial.readString();
-    if (value == currentDirection)
+    if (string.substring(i, i+1) == ",") 
     {
-      return false;
-    }
-    else 
-    {
-      if (value == "Move forward") 
-      {
-        return true;
-      } 
-      else if (value == "Move Back") 
-      {
-        return true;
-      } 
-      else if (value == "Move Left") 
-      {
-        return true;
-      } 
-      else if (value == "Move Right") 
-      {
-        return true;
-      } 
-      else if (value == "Stop") 
-      {
-        return true;
-      }
+      direction = string.substring(0, i);
+      numOfSteps = string.substring(i+1).toInt();
+      break;
     }
   }
-  return false;
 }
+
