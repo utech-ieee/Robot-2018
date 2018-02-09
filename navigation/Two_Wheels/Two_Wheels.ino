@@ -12,6 +12,7 @@ void setup()
 {
   Serial.begin(9600);
   setStepperSpeed(170);
+  Serial.print("End\n");
 }
 
 void loop()
@@ -39,6 +40,7 @@ void loop()
    {
      stop();
    }
+  Serial.print("End\n");
  }
 }
 
@@ -49,10 +51,9 @@ void forward(int steps)
     leftWheel.step(1);
     rightWheel.step(-1);
   }
-  Serial.print("Direction: Forward | Number of Steps: ");
-  Serial.print(steps);
-  Serial.println();
-  Serial.println("Finished");
+//  Serial.print("Direction: Forward | Number of Steps: ");
+//  Serial.print(steps);
+//  Serial.println();
 }
 
 void reverse(int steps)
@@ -62,10 +63,9 @@ void reverse(int steps)
     leftWheel.step(-1);
     rightWheel.step(-1);
   }
-  Serial.println("Direction: Reverse | Number of Steps: ");
-  Serial.print(steps);
-  Serial.println();
-  Serial.println("Finished");
+//  Serial.println("Direction: Reverse | Number of Steps: ");
+//  Serial.print(steps);
+//  Serial.println();
 }
 
 void left(int steps)
@@ -75,10 +75,9 @@ void left(int steps)
     leftWheel.step(-1);
     rightWheel.step(1);
   }
-  Serial.println("Direction: Left | Number of Steps: ");
-  Serial.print(steps);
-  Serial.println();
-  Serial.println("Finished");
+//  Serial.println("Direction: Left | Number of Steps: ");
+//  Serial.print(steps);
+//  Serial.println();
 }
 
 void right(int steps)
@@ -88,18 +87,16 @@ void right(int steps)
     leftWheel.step(-1);
     rightWheel.step(1);
   }
-  Serial.println("Direction: Right | Number of Steps: ");
-  Serial.print(steps);
-  Serial.println();
-  Serial.println("Finished");
+//  Serial.println("Direction: Right | Number of Steps: ");
+//  Serial.print(steps);
+//  Serial.println();
 }
 
 void stop()
 {
   leftWheel.step(0);
   rightWheel.step(0);
-  Serial.println("Direction: Stop");
-  Serial.println("Finished");
+//  Serial.println("Direction: Stop");
 }
 
 void setStepperSpeed(uint8_t speed)
