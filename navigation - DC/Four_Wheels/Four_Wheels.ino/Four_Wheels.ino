@@ -1,4 +1,4 @@
-#define ENCODER_OPTIMIZE_INTERRUPTS
+//#define ENCODER_OPTIMIZE_INTERRUPTS
 #include <Encoder.h>
 #include <Servo.h>
 
@@ -46,10 +46,10 @@ uint8_t motorSpeed = 170;
 /***************************************
  *       ENCODER DECLARATIONS          *
  ***************************************/
-Encoder frontleftEncoder(14, 15);
-Encoder frontrightEncoder(16, 17);
-Encoder backleftEncoder(18, 19);
-Encoder backrightEncoder(20, 21);
+Encoder frontleftEncoder(18, 32);
+Encoder frontrightEncoder(19, 34);
+Encoder backleftEncoder(20, 36);
+Encoder backrightEncoder(21, 38);
 
 long positionFrontLeft  = -999;
 long positionFrontRight = -999;
@@ -119,7 +119,6 @@ void loop()
 //  }
 //  Serial.write("1");
    forward(0, 170);
-   readEncoders();
 }
 
 void forward(int distance, uint8_t speed)
@@ -314,7 +313,7 @@ void setSpeed(int tenthsOfIn, int masterPower)
     delay(100);
  
     //Add this iteration's encoder values to totalTicks.
-    totalTicks+= SensorValue[leftEncoder];
+    totalTicks+= positionFrontLeft;
   }
   // Stop the loop once the encoders have counted up the correct number of encoder ticks.
   analogWrite(FRONT_LEFT_MOTOR_PWM, 0);
@@ -337,53 +336,6 @@ void raiseFlag(int turns)
       spinWheel.detach();
       break;
     }
-  }
-}
-
-void readEncoders()
-{
-  long newFrontLeft;
-  long newFrontRight;
-  long newBackLeft;
-  long newBackRight;
-
-  newFrontLeft = frontleftEncoder.read(); 
-  newFrontRight = frontrightEncoder.read();
-  newBackLeft = backleftEncoder.read();
-  newBackRight = backrightEncoder.read();
-
-
-  if (newFrontLeft != positionFrontLeft || newFrontRight != positionFrontRight || newBackLeft != positionBackLeft || newBackRight != positionBackRight) 
-  {
-    Serial.print("Front Left = ");
-    Serial.print(newFrontLeft);
-
-    Serial.print(", Front Right = ");
-    Serial.print(newFrontRight);
-
-    Serial.print(", Back Left = ");
-    Serial.print(newBackLeft);
-
-    Serial.print(", Back Right = ");
-    Serial.print(newBackRight);
-
-    Serial.println();
-
-    positionFrontLeft = newFrontLeft;
-    positionFrontRight = newFrontRight;
-    positionBackLeft = newBackLeft;
-    positionBackRight = newBackRight;
-  }
-  // if a character is sent from the serial monitor,
-  // reset both back to zero.
-  if (Serial.available()) 
-  {
-    Serial.read();
-    Serial.println("Reset both knobs to zero");
-    frontleftEncoder.write(0); 
-    frontrightEncoder.write(0);
-    backleftEncoder.write(0);
-    backrightEncoder.write(0);
   }
 }
 
