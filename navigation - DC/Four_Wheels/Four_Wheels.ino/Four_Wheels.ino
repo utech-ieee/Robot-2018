@@ -38,7 +38,7 @@ const uint8_t BACK_RIGHT_MOTOR_IN1 = 10;
 const uint8_t BACK_RIGHT_MOTOR_IN2 = 9;
 const uint8_t BACK_RIGHT_MOTOR_PWM = 8;
 
-uint8_t motorSpeed = 170; 
+uint8_t motorSpeed = 255; 
 /***************************************
  ***************************************/
 
@@ -51,10 +51,10 @@ Encoder frontrightEncoder(19, 34);
 Encoder backleftEncoder(20, 36);
 Encoder backrightEncoder(21, 38);
 
-long positionFrontLeft  = -999;
-long positionFrontRight = -999;
-long positionBackLeft  = -999;
-long positionBackRight = -999;
+long positionFrontLeft;
+long positionFrontRight;
+long positionBackLeft;
+long positionBackRight;
 /***************************************
  ***************************************/
  
@@ -117,8 +117,8 @@ void loop()
 //  {
 //    raiseFlag(numOfTurns);
 //  }
-//  Serial.write("1");
-   forward(0, 170);
+//  Serial.write("1");z
+   forward(10, 255);
 }
 
 void forward(int distance, uint8_t speed)
@@ -158,14 +158,14 @@ void reverse(int distance, uint8_t speed)
 
 void left(int distance, uint8_t speed)
 {
-//  digitalWrite(FRONT_LEFT_MOTOR_IN1, LOW);
-//  digitalWrite(FRONT_LEFT_MOTOR_IN2, HIGH);
+  digitalWrite(FRONT_LEFT_MOTOR_IN1, LOW);
+  digitalWrite(FRONT_LEFT_MOTOR_IN2, HIGH);
 
   digitalWrite(FRONT_RIGHT_MOTOR_IN1, LOW);
   digitalWrite(FRONT_RIGHT_MOTOR_IN2, HIGH);
 
-//  digitalWrite(BACK_LEFT_MOTOR_IN1, LOW);
-//  digitalWrite(BACK_LEFT_MOTOR_IN2, HIGH);
+  digitalWrite(BACK_LEFT_MOTOR_IN1, LOW);
+  digitalWrite(BACK_LEFT_MOTOR_IN2, HIGH);
 
   digitalWrite(BACK_RIGHT_MOTOR_IN1, HIGH);
   digitalWrite(BACK_RIGHT_MOTOR_IN2, LOW);
@@ -251,75 +251,146 @@ void stop()
 
 void setSpeed(int tenthsOfIn, int masterPower)
 {
-  int tickGoal = (42 * tenthsOfIn) / 10;
+ int tickGoal = (42 * tenthsOfIn) / 10;
+
+ //This will count up the total encoder ticks despite the fact that the encoders are constantly reset.
+ int totalTicks = 0;
+
+ //Initialise slavePower as masterPower - 5 so we don't get huge error for the first few iterations. The
+ //-5 value is based off a rough guess of how much the motors are different, which prevents the robot from
+ //veering off course at the start of the function.
+ int slavePower1 = masterPower - 5; 
+ int slavePower2 = masterPower - 5;
+ int slavePower3 = masterPower - 5;
+
+ int error1 = 0;
+ int error2 = 0;
+ int error3 = 0;
+
+ int temp1;
+ int temp2;
+ int temp3;
+
+ int kp1 = 0.5; //FRONT_LEFT
+ int kp2 = 0.2; //BACK_LEFT
+ int kp3 = 0.5; //BACK_RIGHT
  
-  //This will count up the total encoder ticks despite the fact that the encoders are constantly reset.
-  int totalTicks = 0;
- 
-  //Initialise slavePower as masterPower - 5 so we don't get huge error for the first few iterations. The
-  //-5 value is based off a rough guess of how much the motors are different, which prevents the robot from
-  //veering off course at the start of the function.
-  int slavePower1 = masterPower - 5; 
-  int slavePower2 = masterPower - 5;
-  int slavePower3 = masterPower - 5;
+ //Master
+ frontrightEncoder.write(0);
 
-  int error1 = 0;
-  int error2 = 0;
-  int error3 = 0;
+ //Slaves
+ frontleftEncoder.write(0);
+ backleftEncoder.write(0);
+ backrightEncoder.write(0);
 
-  int kp1 = 5;
-  int kp2 = 5;
-  int kp3 = 5;
-  
-  //Master
-  frontleftEncoder.write(0);
+ //Monitor 'totalTicks', instead of the values of the encoders which are constantly reset.
+ while(abs(totalTicks) < tickGoal)
+ {
+	//Master
+	positionFrontRight = frontrightEncoder.read();
+	//Slave
+	positionFrontLeft = frontleftEncoder.read();
+	positionBackLeft = backleftEncoder.read();
+	positionBackRight = backrightEncoder.read();
 
-  //Slaves
-  frontrightEncoder.write(0);
-  backleftEncoder.write(0);
-  backrightEncoder.write(0);
- 
-  //Monitor 'totalTicks', instead of the values of the encoders which are constantly reset.
-  while(abs(totalTicks) < tickGoal)
-  {
-    //Proportional algorithm to keep the robot going straight.
-    analogWrite(FRONT_LEFT_MOTOR_PWM, masterPower);
-    analogWrite(FRONT_RIGHT_MOTOR_PWM, slavePower1);
-    analogWrite(BACK_LEFT_MOTOR_PWM, slavePower2);
-    analogWrite(BACK_RIGHT_MOTOR_PWM, slavePower3);
+	Serial.print("FRONT_RIGHT Encoder: ");
+	Serial.print(positionFrontRight);
+	Serial.println();
 
-  
-    positionFrontLeft = frontleftEncoder.read();
-    positionFrontRight = frontrightEncoder.read();
-    positionBackLeft = backleftEncoder.read();
-    positionBackRight = backrightEncoder.read();
+	Serial.print("FRONT_LEFT Encoder: ");
+	Serial.print(positionFrontLeft);
+	Serial.println();
 
-    error1 = positionFrontLeft - positionFrontRight;
-    error2 = positionFrontLeft - positionBackLeft;
-    error3 = positionFrontLeft - positionBackRight;
+	Serial.print("BACK_LEFT Encoder: ");
+	Serial.print(positionBackLeft);
+	Serial.println();
 
-    slavePower1 += error1 / kp1;
-    slavePower2 += error2 / kp2;
-    slavePower3 += error3 / kp3;
-    
-    //Master
-    frontleftEncoder.write(0);
+	Serial.print("BACK_RIGHT Encoder: ");
+	Serial.print(positionBackRight);
+	Serial.println();
+	Serial.println();
 
-    //Slaves
-    frontrightEncoder.write(0);
-    backleftEncoder.write(0);
-    backrightEncoder.write(0);
+	error1 = positionFrontRight - positionFrontLeft;
+	error2 = positionFrontRight - positionBackLeft;
+	error3 = positionFrontRight - positionBackRight;
 
-    delay(100);
- 
-    //Add this iteration's encoder values to totalTicks.
-    totalTicks+= positionFrontLeft;
-  }
-  // Stop the loop once the encoders have counted up the correct number of encoder ticks.
-  analogWrite(FRONT_LEFT_MOTOR_PWM, 0);
-  analogWrite(FRONT_RIGHT_MOTOR_PWM, 0);
-  analogWrite(BACK_LEFT_MOTOR_PWM, 0);
-  analogWrite(BACK_RIGHT_MOTOR_PWM, 0);
+	Serial.print("ERROR1/FRONT_LEFT: ");
+	Serial.print(error1);
+	Serial.println();
+
+	Serial.print("ERROR2/BACK_LEFT: ");
+	Serial.print(error2);
+	Serial.println();
+
+	Serial.print("ERROR3/BACK_RIGHT: ");
+	Serial.print(error3);
+	Serial.println();
+	Serial.println();
+
+	temp1 = (error1 / kp1);
+	temp2 = (error2 / kp2);
+	temp3 = (error3 / kp3);
+
+	Serial.print("Temp1/FRONT_LEFT: ");
+	Serial.print(temp1);
+	Serial.println();
+
+	Serial.print("Temp2/BACK_LEFT: ");
+	Serial.print(temp2);
+	Serial.println();
+
+	Serial.print("Temp3/BACK_RIGHT: ");
+	Serial.print(temp3);
+	Serial.println();
+	Serial.println();
+
+	slavePower1 += temp1;
+	slavePower2 += temp2;
+	slavePower3 += temp3;
+
+	Serial.print("FRONT_RIGHT_MOTOR_PWM: ");
+	Serial.print(masterPower);
+	Serial.println();
+
+	Serial.print("FRONT_LEFT_MOTOR_PWM: ");
+	Serial.print(slavePower1);
+	Serial.println();
+
+	Serial.print("BACK_LEFT_MOTOR_PWM: ");
+	Serial.print(slavePower2);
+	Serial.println();
+
+	Serial.print("BACK_RIGHT_MOTOR_PWM: ");
+	Serial.print(slavePower3);
+	Serial.println();
+	Serial.println();
+
+	//Proportional algorithm to keep the robot going straight.
+	//Master
+	analogWrite(FRONT_RIGHT_MOTOR_PWM, masterPower);
+	//Slave
+	analogWrite(FRONT_LEFT_MOTOR_PWM, slavePower1);
+	analogWrite(BACK_LEFT_MOTOR_PWM, slavePower2);
+	analogWrite(BACK_RIGHT_MOTOR_PWM, slavePower3);
+
+	//Master
+	frontrightEncoder.write(0);
+
+	//Slaves
+	frontleftEncoder.write(0);
+	backleftEncoder.write(0);
+	backrightEncoder.write(0);
+
+	// delay(10);
+
+	//Add this iteration's encoder values to totalTicks.
+	totalTicks+= positionFrontLeft;
+ }
+ // Stop the loop once the encoders have counted up the correct number of encoder ticks.
+ analogWrite(FRONT_LEFT_MOTOR_PWM, 0);
+ analogWrite(FRONT_RIGHT_MOTOR_PWM, 0);
+ analogWrite(BACK_LEFT_MOTOR_PWM, 0);
+ analogWrite(BACK_RIGHT_MOTOR_PWM, 0);
 }
 
 void raiseFlag(int turns) 
@@ -351,4 +422,3 @@ void split(String string)
     }
   }
 }
-
