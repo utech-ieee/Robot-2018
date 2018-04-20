@@ -84,41 +84,42 @@ void setup()
 
 void loop()
 {
-  split(Serial.readString());
-  if(direction == "FORWARD")
-  {
-    forward(numOfTurns, motorSpeed);
-  }
-  else if (direction == "BACK")
-  {
-    reverse(numOfTurns, motorSpeed);
-  }
-  else if (direction == "LEFT")
-  {
-    left(numOfTurns, motorSpeed);
-  }
-  else if (direction == "RIGHT")
-  {
-    right(numOfTurns, motorSpeed);
-  }
-  else if (direction == "REVERSELEFT")
-  {
-    reverseLeft(numOfTurns, motorSpeed);
-  }
-  else if (direction == "REVERSERIGHT")
-  {
-    reverseRight(numOfTurns, motorSpeed);
-  }
-  else if(direction == "STOP")
-  {
-    stop();
-  }
-  else if(direction == "TURNFLAG")
-  {
-    raiseFlag(numOfTurns);
-  }
-  Serial.write("1");
-  // right(170);
+//  split(Serial.readString());
+//  if(direction == "FORWARD")
+//  {
+//    forward(numOfTurns, motorSpeed);
+//  }
+//  else if (direction == "BACK")
+//  {
+//    reverse(numOfTurns, motorSpeed);
+//  }
+//  else if (direction == "LEFT")
+//  {
+//    left(numOfTurns, motorSpeed);
+//  }
+//  else if (direction == "RIGHT")
+//  {
+//    right(numOfTurns, motorSpeed);
+//  }
+//  else if (direction == "REVERSELEFT")
+//  {
+//    reverseLeft(numOfTurns, motorSpeed);
+//  }
+//  else if (direction == "REVERSERIGHT")
+//  {
+//    reverseRight(numOfTurns, motorSpeed);
+//  }
+//  else if(direction == "STOP")
+//  {
+//    stop();
+//  }
+//  else if(direction == "TURNFLAG")
+//  {
+//    raiseFlag(numOfTurns);
+//  }
+//  Serial.write("1");
+   forward(0, 170);
+   readEncoders();
 }
 
 void forward(int distance, uint8_t speed)
@@ -158,14 +159,14 @@ void reverse(int distance, uint8_t speed)
 
 void left(int distance, uint8_t speed)
 {
-  digitalWrite(FRONT_LEFT_MOTOR_IN1, LOW);
-  digitalWrite(FRONT_LEFT_MOTOR_IN2, HIGH);
+//  digitalWrite(FRONT_LEFT_MOTOR_IN1, LOW);
+//  digitalWrite(FRONT_LEFT_MOTOR_IN2, HIGH);
 
   digitalWrite(FRONT_RIGHT_MOTOR_IN1, LOW);
   digitalWrite(FRONT_RIGHT_MOTOR_IN2, HIGH);
 
-  digitalWrite(BACK_LEFT_MOTOR_IN1, LOW);
-  digitalWrite(BACK_LEFT_MOTOR_IN2, HIGH);
+//  digitalWrite(BACK_LEFT_MOTOR_IN1, LOW);
+//  digitalWrite(BACK_LEFT_MOTOR_IN2, HIGH);
 
   digitalWrite(BACK_RIGHT_MOTOR_IN1, HIGH);
   digitalWrite(BACK_RIGHT_MOTOR_IN2, LOW);
@@ -241,13 +242,86 @@ void stop()
   setSpeed(0, 0);
 }       
 
-void setSpeed(int distance, uint8_t speed)
+//void setSpeed(int distance, uint8_t speed)
+//{
+// analogWrite(FRONT_LEFT_MOTOR_PWM, speed);
+// analogWrite(FRONT_RIGHT_MOTOR_PWM, speed);
+// analogWrite(BACK_LEFT_MOTOR_PWM, speed);
+// analogWrite(BACK_RIGHT_MOTOR_PWM, speed);
+//}   
+
+void setSpeed(int tenthsOfIn, int masterPower)
 {
- analogWrite(FRONT_LEFT_MOTOR_PWM, speed);
- analogWrite(FRONT_RIGHT_MOTOR_PWM, speed);
- analogWrite(BACK_LEFT_MOTOR_PWM, speed);
- analogWrite(BACK_RIGHT_MOTOR_PWM, speed);
-}   
+  int tickGoal = (42 * tenthsOfIn) / 10;
+ 
+  //This will count up the total encoder ticks despite the fact that the encoders are constantly reset.
+  int totalTicks = 0;
+ 
+  //Initialise slavePower as masterPower - 5 so we don't get huge error for the first few iterations. The
+  //-5 value is based off a rough guess of how much the motors are different, which prevents the robot from
+  //veering off course at the start of the function.
+  int slavePower1 = masterPower - 5; 
+  int slavePower2 = masterPower - 5;
+  int slavePower3 = masterPower - 5;
+
+  int error1 = 0;
+  int error2 = 0;
+  int error3 = 0;
+
+  int kp1 = 5;
+  int kp2 = 5;
+  int kp3 = 5;
+  
+  //Master
+  frontleftEncoder.write(0);
+
+  //Slaves
+  frontrightEncoder.write(0);
+  backleftEncoder.write(0);
+  backrightEncoder.write(0);
+ 
+  //Monitor 'totalTicks', instead of the values of the encoders which are constantly reset.
+  while(abs(totalTicks) < tickGoal)
+  {
+    //Proportional algorithm to keep the robot going straight.
+    analogWrite(FRONT_LEFT_MOTOR_PWM, masterPower);
+    analogWrite(FRONT_RIGHT_MOTOR_PWM, slavePower1);
+    analogWrite(BACK_LEFT_MOTOR_PWM, slavePower2);
+    analogWrite(BACK_RIGHT_MOTOR_PWM, slavePower3);
+
+  
+    positionFrontLeft = frontleftEncoder.read();
+    positionFrontRight = frontrightEncoder.read();
+    positionBackLeft = backleftEncoder.read();
+    positionBackRight = backrightEncoder.read();
+
+    error1 = positionFrontLeft - positionFrontRight;
+    error2 = positionFrontLeft - positionBackLeft;
+    error3 = positionFrontLeft - positionBackRight;
+
+    slavePower1 += error1 / kp1;
+    slavePower2 += error2 / kp2;
+    slavePower3 += error3 / kp3;
+    
+    //Master
+    frontleftEncoder.write(0);
+
+    //Slaves
+    frontrightEncoder.write(0);
+    backleftEncoder.write(0);
+    backrightEncoder.write(0);
+
+    delay(100);
+ 
+    //Add this iteration's encoder values to totalTicks.
+    totalTicks+= SensorValue[leftEncoder];
+  }
+  // Stop the loop once the encoders have counted up the correct number of encoder ticks.
+  analogWrite(FRONT_LEFT_MOTOR_PWM, 0);
+  analogWrite(FRONT_RIGHT_MOTOR_PWM, 0);
+  analogWrite(BACK_LEFT_MOTOR_PWM, 0);
+  analogWrite(BACK_RIGHT_MOTOR_PWM, 0);
+}
 
 void raiseFlag(int turns) 
 {
@@ -266,6 +340,53 @@ void raiseFlag(int turns)
   }
 }
 
+void readEncoders()
+{
+  long newFrontLeft;
+  long newFrontRight;
+  long newBackLeft;
+  long newBackRight;
+
+  newFrontLeft = frontleftEncoder.read(); 
+  newFrontRight = frontrightEncoder.read();
+  newBackLeft = backleftEncoder.read();
+  newBackRight = backrightEncoder.read();
+
+
+  if (newFrontLeft != positionFrontLeft || newFrontRight != positionFrontRight || newBackLeft != positionBackLeft || newBackRight != positionBackRight) 
+  {
+    Serial.print("Front Left = ");
+    Serial.print(newFrontLeft);
+
+    Serial.print(", Front Right = ");
+    Serial.print(newFrontRight);
+
+    Serial.print(", Back Left = ");
+    Serial.print(newBackLeft);
+
+    Serial.print(", Back Right = ");
+    Serial.print(newBackRight);
+
+    Serial.println();
+
+    positionFrontLeft = newFrontLeft;
+    positionFrontRight = newFrontRight;
+    positionBackLeft = newBackLeft;
+    positionBackRight = newBackRight;
+  }
+  // if a character is sent from the serial monitor,
+  // reset both back to zero.
+  if (Serial.available()) 
+  {
+    Serial.read();
+    Serial.println("Reset both knobs to zero");
+    frontleftEncoder.write(0); 
+    frontrightEncoder.write(0);
+    backleftEncoder.write(0);
+    backrightEncoder.write(0);
+  }
+}
+
 void split(String string)
 {
   for (int i = 0; i < string.length(); i++) 
@@ -278,3 +399,4 @@ void split(String string)
     }
   }
 }
+
