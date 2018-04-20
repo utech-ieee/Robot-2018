@@ -1,4 +1,4 @@
-//#define ENCODER_OPTIMIZE_INTERRUPTS
+#define ENCODER_OPTIMIZE_INTERRUPTS
 #include <Encoder.h>
 #include <Servo.h>
 
