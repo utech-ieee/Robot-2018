@@ -14,8 +14,7 @@ String direction;
  *         SERVO DECLARATIONS          *
  ***************************************/
 Servo spinWheel;
-unsigned long previousMillis = 0;
-int wheelPin = 12;
+int wheelPin = 49;
 /***************************************
  ***************************************/
 
@@ -45,9 +44,10 @@ uint8_t motorSpeed = 255;
 /***************************************
  *      CHEST MOTOR DECLARATION        *
  ***************************************/
-const uint8_t PICKUP_MOTOR_IN1 = 24; // change here
-const uint8_t PICKUP_MOTOR_IN2 = 22;
-const uint8_t PICKUP_MOTOR_PWM = 12;
+const uint8_t PICKUP_MOTOR_IN1 = 51;
+const uint8_t PICKUP_MOTOR_IN2 = 53;
+const uint8_t PICKUP_MOTOR_PWM = 3;
+;
 /***************************************
  ***************************************/
 
@@ -100,6 +100,8 @@ void setup()
   pinMode(PICKUP_MOTOR_PWM, OUTPUT);
   /***************************************
   ***************************************/
+//    forward(48, motorSpeed);
+
 }
 
 void loop()
@@ -137,12 +139,11 @@ void loop()
   {
    raiseFlag(numOfTurns);
   }
-  else if(direction == "TURNFLAG")
+  else if(direction == "PICKUP")
   {
    pickup();
   }
-  Serial.write("1");
-  // forward(10, 255);
+//   pickup();
 }
 
 void forward(int distance, uint8_t speed)
@@ -160,6 +161,7 @@ void forward(int distance, uint8_t speed)
   digitalWrite(BACK_RIGHT_MOTOR_IN2, LOW);
   
   setSpeed(distance, speed);
+//  Serial.write("1");
 }
 
 void reverse(int distance, uint8_t speed)
@@ -178,6 +180,7 @@ void reverse(int distance, uint8_t speed)
   digitalWrite(BACK_RIGHT_MOTOR_IN2, HIGH);
 
   setSpeed(distance, speed);
+//  Serial.write("1");
 }
 
 void left(int distance, uint8_t speed)
@@ -195,6 +198,7 @@ void left(int distance, uint8_t speed)
   digitalWrite(BACK_RIGHT_MOTOR_IN2, LOW);
 
   setSpeed(distance, speed);
+//  Serial.write("1");
 }
 
 void right(int distance, uint8_t speed)
@@ -212,6 +216,7 @@ void right(int distance, uint8_t speed)
   digitalWrite(BACK_RIGHT_MOTOR_IN2, HIGH);
 
   setSpeed(distance, speed);
+//  Serial.write("1");
 }
 
 void reverseLeft(int distance, uint8_t speed)
@@ -229,6 +234,7 @@ void reverseLeft(int distance, uint8_t speed)
   digitalWrite(BACK_RIGHT_MOTOR_IN2, LOW);
 
   setSpeed(distance, speed);
+//  Serial.write("1");
 }
 
 void reverseRight(int distance, uint8_t speed)
@@ -246,6 +252,7 @@ void reverseRight(int distance, uint8_t speed)
   digitalWrite(BACK_RIGHT_MOTOR_IN2, HIGH);
 
   setSpeed(distance, speed);
+//  Serial.write("1");
 }
 
 void stop()
@@ -263,6 +270,7 @@ void stop()
   digitalWrite(BACK_RIGHT_MOTOR_IN2, HIGH);
 
   setSpeed(0, 0);
+//  Serial.write("1");
 }       
 
 //void setSpeed(int distance, uint8_t speed)
@@ -271,11 +279,14 @@ void stop()
 // analogWrite(FRONT_RIGHT_MOTOR_PWM, speed);
 // analogWrite(BACK_LEFT_MOTOR_PWM, speed);
 // analogWrite(BACK_RIGHT_MOTOR_PWM, speed);
+// Serial.write("1");
 //}   
 
 void setSpeed(int tenthsOfIn, int masterPower)
 {
- int tickGoal = (42 * tenthsOfIn) / 10;
+ float tickGoal = abs(tenthsOfIn * 174);
+
+ Serial.println(tickGoal);
 
  //This will count up the total encoder ticks despite the fact that the encoders are constantly reset.
  int totalTicks = 0;
@@ -317,77 +328,77 @@ void setSpeed(int tenthsOfIn, int masterPower)
   positionBackLeft = backleftEncoder.read();
   positionBackRight = backrightEncoder.read();
 
-  Serial.print("FRONT_RIGHT Encoder: ");
-  Serial.print(positionFrontRight);
-  Serial.println();
-
-  Serial.print("FRONT_LEFT Encoder: ");
-  Serial.print(positionFrontLeft);
-  Serial.println();
-
-  Serial.print("BACK_LEFT Encoder: ");
-  Serial.print(positionBackLeft);
-  Serial.println();
-
-  Serial.print("BACK_RIGHT Encoder: ");
-  Serial.print(positionBackRight);
-  Serial.println();
-  Serial.println();
+//  Serial.print("FRONT_RIGHT Encoder: ");
+//  Serial.print(positionFrontRight);
+//  Serial.println();
+//
+//  Serial.print("FRONT_LEFT Encoder: ");
+//  Serial.print(positionFrontLeft);
+//  Serial.println();
+//
+//  Serial.print("BACK_LEFT Encoder: ");
+//  Serial.print(positionBackLeft);
+//  Serial.println();
+//
+//  Serial.print("BACK_RIGHT Encoder: ");
+//  Serial.print(positionBackRight);
+//  Serial.println();
+//  Serial.println();
 
   error1 = positionFrontRight - positionFrontLeft;
   error2 = positionFrontRight - positionBackLeft;
   error3 = positionFrontRight - positionBackRight;
 
-  Serial.print("ERROR1/FRONT_LEFT: ");
-  Serial.print(error1);
-  Serial.println();
-
-  Serial.print("ERROR2/BACK_LEFT: ");
-  Serial.print(error2);
-  Serial.println();
-
-  Serial.print("ERROR3/BACK_RIGHT: ");
-  Serial.print(error3);
-  Serial.println();
-  Serial.println();
+//  Serial.print("ERROR1/FRONT_LEFT: ");
+//  Serial.print(error1);
+//  Serial.println();
+//
+//  Serial.print("ERROR2/BACK_LEFT: ");
+//  Serial.print(error2);
+//  Serial.println();
+//
+//  Serial.print("ERROR3/BACK_RIGHT: ");
+//  Serial.print(error3);
+//  Serial.println();
+//  Serial.println();
 
   temp1 = (error1 / kp1);
   temp2 = (error2 / kp2);
   temp3 = (error3 / kp3);
 
-  Serial.print("Temp1/FRONT_LEFT: ");
-  Serial.print(temp1);
-  Serial.println();
-
-  Serial.print("Temp2/BACK_LEFT: ");
-  Serial.print(temp2);
-  Serial.println();
-
-  Serial.print("Temp3/BACK_RIGHT: ");
-  Serial.print(temp3);
-  Serial.println();
-  Serial.println();
+//  Serial.print("Temp1/FRONT_LEFT: ");
+//  Serial.print(temp1);
+//  Serial.println();
+//
+//  Serial.print("Temp2/BACK_LEFT: ");
+//  Serial.print(temp2);
+//  Serial.println();
+//
+//  Serial.print("Temp3/BACK_RIGHT: ");
+//  Serial.print(temp3);
+//  Serial.println();
+//  Serial.println();
 
   slavePower1 += temp1;
   slavePower2 += temp2;
   slavePower3 += temp3;
-
-  Serial.print("FRONT_RIGHT_MOTOR_PWM: ");
-  Serial.print(masterPower);
-  Serial.println();
-
-  Serial.print("FRONT_LEFT_MOTOR_PWM: ");
-  Serial.print(slavePower1);
-  Serial.println();
-
-  Serial.print("BACK_LEFT_MOTOR_PWM: ");
-  Serial.print(slavePower2);
-  Serial.println();
-
-  Serial.print("BACK_RIGHT_MOTOR_PWM: ");
-  Serial.print(slavePower3);
-  Serial.println();
-  Serial.println();
+//
+//  Serial.print("FRONT_RIGHT_MOTOR_PWM: ");
+//  Serial.print(masterPower);
+//  Serial.println();
+//
+//  Serial.print("FRONT_LEFT_MOTOR_PWM: ");
+//  Serial.print(slavePower1);
+//  Serial.println();
+//
+//  Serial.print("BACK_LEFT_MOTOR_PWM: ");
+//  Serial.print(slavePower2);
+//  Serial.println();
+//
+//  Serial.print("BACK_RIGHT_MOTOR_PWM: ");
+//  Serial.print(slavePower3);
+//  Serial.println();
+//  Serial.println();
 
   //Proportional algorithm to keep the robot going straight.
   //Master
@@ -415,6 +426,7 @@ void setSpeed(int tenthsOfIn, int masterPower)
  analogWrite(FRONT_RIGHT_MOTOR_PWM, 0);
  analogWrite(BACK_LEFT_MOTOR_PWM, 0);
  analogWrite(BACK_RIGHT_MOTOR_PWM, 0);
+Serial.write("1");
 }
 
 void raiseFlag(int turns) 
@@ -423,28 +435,31 @@ void raiseFlag(int turns)
   spinWheel.write(180);
   delay(int(1170*turns));
   spinWheel.detach();
+  Serial.write("1");
 }
 
 void pickup()
 {
+ //Drop Magnet
+ digitalWrite(PICKUP_MOTOR_IN1, HIGH);
+ digitalWrite(PICKUP_MOTOR_IN2, LOW);
+ analogWrite(PICKUP_MOTOR_PWM, 90);
+
+ delay(1000);
+
   //Pick Magnet
-  digitalWrite(PICKUP_MOTOR_IN1, HIGH);
-  digitalWrite(PICKUP_MOTOR_IN2, LOW);
-  analogWrite(PICKUP_MOTOR_PWM, motorSpeed);
-
-  delay(100);
-
-  //Drop Magnet
   digitalWrite(PICKUP_MOTOR_IN1, LOW);
   digitalWrite(PICKUP_MOTOR_IN2, HIGH);
-  analogWrite(PICKUP_MOTOR_PWM, motorSpeed);
+  analogWrite(PICKUP_MOTOR_PWM, 90);
 
-  delay(100);
+  delay(1000);
 
-  //Stop
-  digitalWrite(PICKUP_MOTOR_IN1, HIGH);
-  digitalWrite(PICKUP_MOTOR_IN2, HIGH);
-  analogWrite(PICKUP_MOTOR_PWM, 0);
+ //Stop
+ digitalWrite(PICKUP_MOTOR_IN1, HIGH);
+ digitalWrite(PICKUP_MOTOR_IN2, HIGH);
+ analogWrite(PICKUP_MOTOR_PWM, 0);
+
+ Serial.write("1");
 }
 
 void split(String string)
