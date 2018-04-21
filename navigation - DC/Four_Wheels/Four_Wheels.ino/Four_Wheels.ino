@@ -42,6 +42,15 @@ uint8_t motorSpeed = 255;
 /***************************************
  ***************************************/
 
+/***************************************
+ *      CHEST MOTOR DECLARATION        *
+ ***************************************/
+const uint8_t PICKUP_MOTOR_IN1 = 24; // change here
+const uint8_t PICKUP_MOTOR_IN2 = 22;
+const uint8_t PICKUP_MOTOR_PWM = 12;
+/***************************************
+ ***************************************/
+
 
 /***************************************
  *       ENCODER DECLARATIONS          *
@@ -80,45 +89,60 @@ void setup()
   pinMode(BACK_RIGHT_MOTOR_IN1, OUTPUT);
   pinMode(BACK_RIGHT_MOTOR_IN2, OUTPUT);
   pinMode(BACK_RIGHT_MOTOR_PWM, OUTPUT);
+  /***************************************
+  ***************************************/
+
+  /***************************************
+   *         CHEST MOTOR                 *
+   ***************************************/
+  pinMode(PICKUP_MOTOR_IN1, OUTPUT);
+  pinMode(PICKUP_MOTOR_IN2, OUTPUT);
+  pinMode(PICKUP_MOTOR_PWM, OUTPUT);
+  /***************************************
+  ***************************************/
 }
 
 void loop()
 {
-//  split(Serial.readString());
-//  if(direction == "FORWARD")
-//  {
-//    forward(numOfTurns, motorSpeed);
-//  }
-//  else if (direction == "BACK")
-//  {
-//    reverse(numOfTurns, motorSpeed);
-//  }
-//  else if (direction == "LEFT")
-//  {
-//    left(numOfTurns, motorSpeed);
-//  }
-//  else if (direction == "RIGHT")
-//  {
-//    right(numOfTurns, motorSpeed);
-//  }
-//  else if (direction == "REVERSELEFT")
-//  {
-//    reverseLeft(numOfTurns, motorSpeed);
-//  }
-//  else if (direction == "REVERSERIGHT")
-//  {
-//    reverseRight(numOfTurns, motorSpeed);
-//  }
-//  else if(direction == "STOP")
-//  {
-//    stop();
-//  }
-//  else if(direction == "TURNFLAG")
-//  {
-//    raiseFlag(numOfTurns);
-//  }
-//  Serial.write("1");z
-   forward(10, 255);
+  split(Serial.readString());
+  if(direction == "FORWARD")
+  {
+   forward(numOfTurns, motorSpeed);
+  }
+  else if (direction == "BACK")
+  {
+   reverse(numOfTurns, motorSpeed);
+  }
+  else if (direction == "LEFT")
+  {
+   left(numOfTurns, motorSpeed);
+  }
+  else if (direction == "RIGHT")
+  {
+   right(numOfTurns, motorSpeed);
+  }
+  else if (direction == "REVERSELEFT")
+  {
+   reverseLeft(numOfTurns, motorSpeed);
+  }
+  else if (direction == "REVERSERIGHT")
+  {
+   reverseRight(numOfTurns, motorSpeed);
+  }
+  else if(direction == "STOP")
+  {
+   stop();
+  }
+  else if(direction == "TURNFLAG")
+  {
+   raiseFlag(numOfTurns);
+  }
+  else if(direction == "TURNFLAG")
+  {
+   pickup();
+  }
+  Serial.write("1");
+  // forward(10, 255);
 }
 
 void forward(int distance, uint8_t speed)
@@ -286,105 +310,105 @@ void setSpeed(int tenthsOfIn, int masterPower)
  //Monitor 'totalTicks', instead of the values of the encoders which are constantly reset.
  while(abs(totalTicks) < tickGoal)
  {
-	//Master
-	positionFrontRight = frontrightEncoder.read();
-	//Slave
-	positionFrontLeft = frontleftEncoder.read();
-	positionBackLeft = backleftEncoder.read();
-	positionBackRight = backrightEncoder.read();
+  //Master
+  positionFrontRight = frontrightEncoder.read();
+  //Slave
+  positionFrontLeft = frontleftEncoder.read();
+  positionBackLeft = backleftEncoder.read();
+  positionBackRight = backrightEncoder.read();
 
-	Serial.print("FRONT_RIGHT Encoder: ");
-	Serial.print(positionFrontRight);
-	Serial.println();
+  Serial.print("FRONT_RIGHT Encoder: ");
+  Serial.print(positionFrontRight);
+  Serial.println();
 
-	Serial.print("FRONT_LEFT Encoder: ");
-	Serial.print(positionFrontLeft);
-	Serial.println();
+  Serial.print("FRONT_LEFT Encoder: ");
+  Serial.print(positionFrontLeft);
+  Serial.println();
 
-	Serial.print("BACK_LEFT Encoder: ");
-	Serial.print(positionBackLeft);
-	Serial.println();
+  Serial.print("BACK_LEFT Encoder: ");
+  Serial.print(positionBackLeft);
+  Serial.println();
 
-	Serial.print("BACK_RIGHT Encoder: ");
-	Serial.print(positionBackRight);
-	Serial.println();
-	Serial.println();
+  Serial.print("BACK_RIGHT Encoder: ");
+  Serial.print(positionBackRight);
+  Serial.println();
+  Serial.println();
 
-	error1 = positionFrontRight - positionFrontLeft;
-	error2 = positionFrontRight - positionBackLeft;
-	error3 = positionFrontRight - positionBackRight;
+  error1 = positionFrontRight - positionFrontLeft;
+  error2 = positionFrontRight - positionBackLeft;
+  error3 = positionFrontRight - positionBackRight;
 
-	Serial.print("ERROR1/FRONT_LEFT: ");
-	Serial.print(error1);
-	Serial.println();
+  Serial.print("ERROR1/FRONT_LEFT: ");
+  Serial.print(error1);
+  Serial.println();
 
-	Serial.print("ERROR2/BACK_LEFT: ");
-	Serial.print(error2);
-	Serial.println();
+  Serial.print("ERROR2/BACK_LEFT: ");
+  Serial.print(error2);
+  Serial.println();
 
-	Serial.print("ERROR3/BACK_RIGHT: ");
-	Serial.print(error3);
-	Serial.println();
-	Serial.println();
+  Serial.print("ERROR3/BACK_RIGHT: ");
+  Serial.print(error3);
+  Serial.println();
+  Serial.println();
 
-	temp1 = (error1 / kp1);
-	temp2 = (error2 / kp2);
-	temp3 = (error3 / kp3);
+  temp1 = (error1 / kp1);
+  temp2 = (error2 / kp2);
+  temp3 = (error3 / kp3);
 
-	Serial.print("Temp1/FRONT_LEFT: ");
-	Serial.print(temp1);
-	Serial.println();
+  Serial.print("Temp1/FRONT_LEFT: ");
+  Serial.print(temp1);
+  Serial.println();
 
-	Serial.print("Temp2/BACK_LEFT: ");
-	Serial.print(temp2);
-	Serial.println();
+  Serial.print("Temp2/BACK_LEFT: ");
+  Serial.print(temp2);
+  Serial.println();
 
-	Serial.print("Temp3/BACK_RIGHT: ");
-	Serial.print(temp3);
-	Serial.println();
-	Serial.println();
+  Serial.print("Temp3/BACK_RIGHT: ");
+  Serial.print(temp3);
+  Serial.println();
+  Serial.println();
 
-	slavePower1 += temp1;
-	slavePower2 += temp2;
-	slavePower3 += temp3;
+  slavePower1 += temp1;
+  slavePower2 += temp2;
+  slavePower3 += temp3;
 
-	Serial.print("FRONT_RIGHT_MOTOR_PWM: ");
-	Serial.print(masterPower);
-	Serial.println();
+  Serial.print("FRONT_RIGHT_MOTOR_PWM: ");
+  Serial.print(masterPower);
+  Serial.println();
 
-	Serial.print("FRONT_LEFT_MOTOR_PWM: ");
-	Serial.print(slavePower1);
-	Serial.println();
+  Serial.print("FRONT_LEFT_MOTOR_PWM: ");
+  Serial.print(slavePower1);
+  Serial.println();
 
-	Serial.print("BACK_LEFT_MOTOR_PWM: ");
-	Serial.print(slavePower2);
-	Serial.println();
+  Serial.print("BACK_LEFT_MOTOR_PWM: ");
+  Serial.print(slavePower2);
+  Serial.println();
 
-	Serial.print("BACK_RIGHT_MOTOR_PWM: ");
-	Serial.print(slavePower3);
-	Serial.println();
-	Serial.println();
+  Serial.print("BACK_RIGHT_MOTOR_PWM: ");
+  Serial.print(slavePower3);
+  Serial.println();
+  Serial.println();
 
-	//Proportional algorithm to keep the robot going straight.
-	//Master
-	analogWrite(FRONT_RIGHT_MOTOR_PWM, masterPower);
-	//Slave
-	analogWrite(FRONT_LEFT_MOTOR_PWM, slavePower1);
-	analogWrite(BACK_LEFT_MOTOR_PWM, slavePower2);
-	analogWrite(BACK_RIGHT_MOTOR_PWM, slavePower3);
+  //Proportional algorithm to keep the robot going straight.
+  //Master
+  analogWrite(FRONT_RIGHT_MOTOR_PWM, masterPower);
+  //Slave
+  analogWrite(FRONT_LEFT_MOTOR_PWM, slavePower1);
+  analogWrite(BACK_LEFT_MOTOR_PWM, slavePower2);
+  analogWrite(BACK_RIGHT_MOTOR_PWM, slavePower3);
 
-	//Master
-	frontrightEncoder.write(0);
+  //Master
+  frontrightEncoder.write(0);
 
-	//Slaves
-	frontleftEncoder.write(0);
-	backleftEncoder.write(0);
-	backrightEncoder.write(0);
+  //Slaves
+  frontleftEncoder.write(0);
+  backleftEncoder.write(0);
+  backrightEncoder.write(0);
 
-	// delay(10);
+  // delay(10);
 
-	//Add this iteration's encoder values to totalTicks.
-	totalTicks+= positionFrontLeft;
+  //Add this iteration's encoder values to totalTicks.
+  totalTicks+= positionFrontLeft;
  }
  // Stop the loop once the encoders have counted up the correct number of encoder ticks.
  analogWrite(FRONT_LEFT_MOTOR_PWM, 0);
@@ -396,18 +420,31 @@ void setSpeed(int tenthsOfIn, int masterPower)
 void raiseFlag(int turns) 
 {
   spinWheel.attach(wheelPin);
-  long interval = long(1170*turns);  
-  unsigned long currentMillis = millis();  
-  while (true)
-  {
-    previousMillis = currentMillis;
-    spinWheel.write(180);
-    if (currentMillis - previousMillis >= interval) 
-    {
-      spinWheel.detach();
-      break;
-    }
-  }
+  spinWheel.write(180);
+  delay(int(1170*turns));
+  spinWheel.detach();
+}
+
+void pickup()
+{
+  //Pick Magnet
+  digitalWrite(PICKUP_MOTOR_IN1, HIGH);
+  digitalWrite(PICKUP_MOTOR_IN2, LOW);
+  analogWrite(PICKUP_MOTOR_PWM, motorSpeed);
+
+  delay(100);
+
+  //Drop Magnet
+  digitalWrite(PICKUP_MOTOR_IN1, LOW);
+  digitalWrite(PICKUP_MOTOR_IN2, HIGH);
+  analogWrite(PICKUP_MOTOR_PWM, motorSpeed);
+
+  delay(100);
+
+  //Stop
+  digitalWrite(PICKUP_MOTOR_IN1, HIGH);
+  digitalWrite(PICKUP_MOTOR_IN2, HIGH);
+  analogWrite(PICKUP_MOTOR_PWM, 0);
 }
 
 void split(String string)
